@@ -74,7 +74,7 @@ curl -fsSL https://raw.githubusercontent.com/nilanshpratapanand/ContextManager-C
 
 It installs to `%USERPROFILE%\ContextOS` or `~/ContextOS`. **Run it again to update**: your `.env` keys and your chats are never touched.
 
-**It also updates itself.** Every time you start `RUN.bat` or `run.sh`, ContextOS checks GitHub for a newer [release](https://github.com/nilanshpratapanand/ContextManager-Context-OS/releases/latest) (5 second timeout, silent when you're offline), installs it and restarts on the new version. Your `.env`, chats, databases, `mcp.json` and `.venv` are never overwritten; files it replaces are copied to `.update_backup/` first. A git checkout is fast-forwarded to the release tag, and left alone if you have local changes. Press **U** in the `RUN.bat` menu to check on demand. To turn it off, set `CONTEXTOS_NO_UPDATE=1` (or start `run.sh` with `--no-update`).
+**It also updates itself.** Every time you start `RUN.bat` or `run.sh`, ContextOS checks the newest commit on this repository's `main` branch (5 second timeout, silent when you're offline), installs it and restarts on the new version, so whatever was pushed last is what runs. Your `.env`, chats, databases, `mcp.json` and `.venv` are never overwritten; files it replaces are copied to `.update_backup/` first. A git checkout is fast-forwarded, and left alone if you have local changes. Press **U** in the `RUN.bat` menu to check on demand. To follow only published [releases](https://github.com/nilanshpratapanand/ContextManager-Context-OS/releases/latest) instead, set `CONTEXTOS_UPDATE_CHANNEL=release`. To turn updating off, set `CONTEXTOS_NO_UPDATE=1`.
 
 | Option | Windows | macOS / Linux |
 |---|---|---|

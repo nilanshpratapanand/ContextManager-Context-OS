@@ -1,5 +1,6 @@
 /* ContextOS "Ultramarine Ledger" tokens. Verify: contrast.py --css design/tokens.css */
 :root{
+  color-scheme:light;
   --bg:#F4F2EC; --surface:#FFFFFF; --sunken:#EAE7DE; --text:#0E0F13; --muted:#52576A; --border:#DAD6CA;
   --accent:#2431E8; --accent-ink:#FFFFFF; --danger:#B42318; --success:#0B6B3A; --warn:#8A5300;
   --user-bg:#E8E5DB;
@@ -11,10 +12,12 @@
   --ease-emph:cubic-bezier(.16,1,.3,1);
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#0A0B0F; --surface:#12141A; --sunken:#07080B; --text:#ECEBE6; --muted:#9A9FAE; --border:#232630;
+  color-scheme:dark;
+  --bg:#0B0C11; --surface:#14161D; --sunken:#0F1116; --text:#ECEBE6; --muted:#9EA3B2; --border:#2B2F3B;
   --accent:#8797FF; --accent-ink:#0A0B0F; --danger:#FF8F84; --success:#6FD59A; --warn:#F0B35A;
-  --user-bg:#1A1D26;}}
+  --user-bg:#1D2029;}}
 :root[data-theme="dark"]{
-  --bg:#0A0B0F; --surface:#12141A; --sunken:#07080B; --text:#ECEBE6; --muted:#9A9FAE; --border:#232630;
+  color-scheme:dark;
+  --bg:#0B0C11; --surface:#14161D; --sunken:#0F1116; --text:#ECEBE6; --muted:#9EA3B2; --border:#2B2F3B;
   --accent:#8797FF; --accent-ink:#0A0B0F; --danger:#FF8F84; --success:#6FD59A; --warn:#F0B35A;
-  --user-bg:#1A1D26;}
+  --user-bg:#1D2029;}

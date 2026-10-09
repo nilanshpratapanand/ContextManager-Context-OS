@@ -66,3 +66,10 @@ Slop-scan warnings, kept on purpose: (1) coloured left stripes remain only on Bu
 Timing audit: feedback 120 ms, panels and messages 220 ms, welcome and boot 360 ms with 45-60 ms stagger (under 400 ms total), theme reveal 460 ms (once, on demand), view transition out 120 ms / in 220 ms. Exits are shorter than entrances. Only transform, opacity and clip-path animate.
 
 Not verified: real-device performance on a low-end laptop, and the Build board against a live build. Existing CDN scripts (highlight.js, KaTeX) still load from cdnjs when online; that predates this work.
+
+## Theme control and mobile polish (0.3.0)
+
+- **Three states, not two.** The theme button cycles System, Light, Dark. System follows the OS live (a `matchMedia` change listener) and its icon is a monitor, so the control never claims a state it is not in. Title and `aria-label` always name the current state and the next one, and a toast confirms the change.
+- **No flash.** A tiny script in `<head>` applies the saved theme and the `theme-color` meta before first paint. `color-scheme` is declared in both themes so scrollbars, form controls and the textarea caret match.
+- **Dark depth.** Dark surfaces are lifted (`--bg #0B0C11`, `--surface #14161D`, `--sunken #0F1116`, `--border #2B2F3B`) so the sidebar, cards and hairlines separate instead of merging into one black plane. Checked with `contrast.py --css design/tokens.css`: every pair passes (text 15 to 16:1, muted over 7:1, accent over 7:1).
+- **Touch.** Under `pointer: coarse` icon buttons are 44 px and the lane switch buttons 36 px tall. On phones the lane switch moves to its own full-width row under the title.
