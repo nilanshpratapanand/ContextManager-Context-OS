@@ -34,7 +34,7 @@ rem Skip with:  set CONTEXTOS_NO_UPDATE=1   The block below is parsed as a whole
 rem so it is safe for the update to replace this very file while it runs.
 if defined CONTEXTOS_NO_UPDATE goto noupdate
 if /i "%~1"=="/noupdate" goto noupdate
-echo Checking for a newer ContextOS release...
+echo Checking for the latest ContextOS updates...
 %PY% -m contextos.update
 if errorlevel 10 (
   echo.
@@ -68,7 +68,7 @@ echo.
 echo   ---- see the research ----------------------------------
 echo   3.  Demo              the whole story in the terminal
 echo   4.  Benchmark         offline sufficiency table
-echo   5.  Tests             64 tests, proves it works
+echo   5.  Tests             108 tests, proves it works
 echo.
 echo   ---- live models -------------------------------------------
 echo   6.  Check API keys    which keys .env actually has
@@ -78,7 +78,7 @@ echo.
 echo   ---- play with it ------------------------------------------
 echo   9.  Sample project    seed a store and try a handoff
 echo   C.  Command prompt    run contextos commands yourself
-echo   U.  Update            get the latest release now
+echo   U.  Update            get the latest updates now
 echo   R.  Reset             delete ALL chats and local databases
 echo.
 echo   0.  Exit

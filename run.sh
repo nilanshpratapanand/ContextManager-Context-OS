@@ -12,7 +12,7 @@ elif command -v python3 >/dev/null 2>&1; then PY="python3"
 else echo "Python 3.9+ not found. Run install.sh first." >&2; exit 1
 fi
 
-# Update to the latest release (5 s timeout, silent when offline). .env, chats and
+# Update to the latest repo changes (5 s timeout, silent when offline). .env, chats and
 # keys are never touched. Skip with CONTEXTOS_NO_UPDATE=1 or --no-update.
 if [ "${1:-}" = "--no-update" ]; then shift
 elif [ "${CONTEXTOS_NO_UPDATE:-}" != "1" ] && [ "${1:-}" != "test" ] && [ "${1:-}" != "check" ]; then
