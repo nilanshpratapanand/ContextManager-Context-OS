@@ -167,6 +167,10 @@ every other model in the pool. Images need a free Gemini key; PDFs need the opti
 package; everything else is decoded directly. Files are capped (4 per message, 6 MB each,
 24k characters kept) and fenced as data the model must not obey.
 
+**Sampling profiles.** The reply temperature is chosen from the prompt by the same deterministic
+text analysis as the lane: 0.2 for code, arithmetic and faithful rewording, 0.9 for open-ended
+writing, 0.6 otherwise. It is a cheap, predictable heuristic, not a measured result.
+
 **Local-only mode** (`LLM_LOCAL_ONLY=1`) restricts routing to models served on this machine
 (Ollama) and disables cloud image description, so nothing leaves the computer.
 

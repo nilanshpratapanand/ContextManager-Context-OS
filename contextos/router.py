@@ -94,6 +94,30 @@ def score(prompt: str) -> tuple[float, list[str]]:
     return round(max(0.0, min(1.0, s)), 2), reasons or ["simple"]
 
 
+# ---------------------------------------------------------------- sampling
+# Per-kind sampling temperature, chosen by the same deterministic text analysis as
+# the lane (no model call). Precise work (code, arithmetic, extraction) gets a low
+# temperature, open-ended writing a high one, everything else the old default.
+# This is a heuristic, not a measured result: it is cheap, predictable and easy to
+# override, which is the whole point.
+_CREATIVE = re.compile(r"\b(story|poem|poetry|lyrics?|slogan|tagline|brainstorm|"
+                       r"ideas?|names? for|creative|imagine|fiction|joke|rap|haiku)\b", re.I)
+TEMP_PRECISE, TEMP_DEFAULT, TEMP_CREATIVE = 0.2, 0.6, 0.9
+
+
+def temperature_for(prompt: str) -> float:
+    """Deterministic sampling temperature for a prompt."""
+    text = prompt or ""
+    if _CREATIVE.search(text):
+        return TEMP_CREATIVE
+    if _CODE.search(text) or (_CODE_ASK.search(text) and _MAKE.search(text)) or (
+            len(_NUM.findall(text)) >= 2 and _MATH.search(text)):
+        return TEMP_PRECISE
+    if _LIGHT.search(text) and not _HARD.search(text):
+        return TEMP_PRECISE            # rewording, translating, summarising: stay faithful
+    return TEMP_DEFAULT
+
+
 def decide(prompt: str, mode: str = "auto",
            threshold: float = DEFAULT_THRESHOLD) -> Decision:
     sc, reasons = score(prompt)

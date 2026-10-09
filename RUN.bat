@@ -68,7 +68,7 @@ echo.
 echo   ---- see the research ----------------------------------
 echo   3.  Demo              the whole story in the terminal
 echo   4.  Benchmark         offline sufficiency table
-echo   5.  Tests             108 tests, proves it works
+echo   5.  Tests             all tests, proves it works
 echo.
 echo   ---- live models -------------------------------------------
 echo   6.  Check API keys    which keys .env actually has
@@ -180,7 +180,10 @@ goto done
 
 :tests
 cls
-%PY% tests\test_contextos.py
+for %%t in (contextos pipeline attachments sampling update_main) do (
+  %PY% tests\test_%%t.py
+  echo.
+)
 goto done
 
 :keys

@@ -139,6 +139,7 @@ class Engine:
         self.env = env
         self.offline = offline
         self._test_pool = None
+        self._tl = threading.local()
         self._save_lock = threading.Lock()
         self._test_describe = None
         self.budget = budget
@@ -194,7 +195,8 @@ class Engine:
                 time.sleep(0.004)
                 yield word
             return
-        for kind, chunk in stream_events(PROVIDERS[name], system, user, self.env):
+        for kind, chunk in stream_events(PROVIDERS[name], system, user, self.env,
+                                         temperature=getattr(self._tl, "temp", 0.7)):
             yield chunk if kind == "text" else ("think", chunk)
 
     def _offline_reply(self, name: str, user: str) -> str:
@@ -446,7 +448,9 @@ class Engine:
 
         wanted = forced or (lane if lane in (router.SMART, router.FAST) else self.mode)
         decision = router.decide(text_in, wanted, self.threshold)
-        yield {"type": "route", **self._route_info(decision)}
+        temp = router.temperature_for(text_in)
+        self._tl.temp = temp                  # read by _stream; per thread, so chats don't mix
+        yield {"type": "route", **self._route_info(decision), "temperature": temp}
 
         if not ctx.get("/task/goal"):
             ctx.put("/task/goal", text_in.strip()[:400], kind="goal",
