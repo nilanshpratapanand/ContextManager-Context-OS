@@ -167,6 +167,23 @@ every other model in the pool. Images need a free Gemini key; PDFs need the opti
 package; everything else is decoded directly. Files are capped (4 per message, 6 MB each,
 24k characters kept) and fenced as data the model must not obey.
 
+**Ideas taken from NOOA.** NVIDIA's NOOA report (Furgale et al., arXiv 2607.20709, with an
+[NVIDIA blog summary](https://developer.nvidia.com/blog/six-agent-harness-capabilities-for-higher-model-performance/))
+argues the harness around a model matters as much as the model. Two of its ideas fit ContextOS
+and are implemented here in a much smaller form. Its benchmark numbers (for example SWE-bench
+Verified 82.2% with GPT-5.5) belong to NOOA's own setup and say nothing about ContextOS.
+
+- *Pass by reference, bounded previews.* A big attachment is not pasted into the prompt. It is
+  split into parts stored at `/artifact/uploads/<file>/part-NN`; each turn shows only the parts
+  that share words with the question (the opening part is always shown, and a file read with no
+  overlap is read in order), plus a list of the parts left out and where they live.
+- *Memory the agent can tidy.* `reflect.py` runs after each turn: exact duplicates kept once
+  (the rest superseded, history kept), old low-value tool results pruned, `derived_from` links
+  checked. Pipeline results link to the step outputs they were built from. Everything is
+  deterministic; goals, constraints, blockers, decisions, preferences and uploads are never
+  touched. NOOA's reflection pass uses a model to merge and distil; ContextOS keeps units
+  verbatim (D3), so it does not.
+
 **Sampling profiles.** The reply temperature is chosen from the prompt by the same deterministic
 text analysis as the lane: 0.2 for code, arithmetic and faithful rewording, 0.9 for open-ended
 writing, 0.6 otherwise. It is a cheap, predictable heuristic, not a measured result.
@@ -255,5 +272,6 @@ These are spot checks, not a benchmark.
 - [MemGPT: Towards LLMs as Operating Systems](https://arxiv.org/abs/2310.08560) — arXiv 2310.08560
 - [Mem0: Building Production-Ready AI Agents with Scalable Long-Term Memory](https://arxiv.org/abs/2504.19413) — arXiv 2504.19413
 - [Zep: A Temporal Knowledge Graph Architecture for Agent Memory](https://arxiv.org/abs/2501.13956) — arXiv 2501.13956
+- [NVIDIA-labs OO Agents (NOOA)](https://arxiv.org/abs/2607.20709), arXiv 2607.20709
 - [LLMCompiler](https://arxiv.org/abs/2312.04511), [FrugalGPT](https://arxiv.org/abs/2305.05176), [RouteLLM](https://arxiv.org/abs/2406.18665), [Mixture-of-Agents](https://arxiv.org/abs/2406.04692)
 - [Model Context Protocol specification 2026-07-28](https://modelcontextprotocol.io/specification/2026-07-28/server/tools)

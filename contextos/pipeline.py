@@ -209,5 +209,6 @@ def run(prompt: str, ask: Ask, context: str = "", *, workers: int = 3,
             final = "\n\n".join(s.output for s in good)   # merging failed: show the parts
             who = good[-1].provider
     yield {"type": "pipeline_result", "text": final, "provider": who,
-           "steps": [{"id": s.id, "kind": s.kind, "lane": s.lane,
-                      "provider": s.provider, "ok": not s.error} for s in steps]}
+           "steps": [{"id": s.id, "kind": s.kind, "lane": s.lane, "task": s.task,
+                      "provider": s.provider, "ok": not s.error,
+                      "output": s.output[:1500]} for s in steps]}

@@ -24,7 +24,7 @@ elif [ "${CONTEXTOS_NO_UPDATE:-}" != "1" ] && [ "${1:-}" != "test" ] && [ "${1:-
 fi
 
 case "${1:-}" in
-  test)  for t in contextos pipeline attachments sampling update_main; do "$PY" "tests/test_$t.py"; done ;;
+  test)  for t in contextos pipeline attachments sampling reflect update_main; do "$PY" "tests/test_$t.py"; done ;;
   check) exec "$PY" -m contextos.live --check ;;
   *)     echo "Starting ContextOS at http://127.0.0.1:8000  (Ctrl+C to stop)"
          exec "$PY" -m contextos.server "$@" ;;

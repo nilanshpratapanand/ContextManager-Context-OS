@@ -180,7 +180,7 @@ goto done
 
 :tests
 cls
-for %%t in (contextos pipeline attachments sampling update_main) do (
+for %%t in (contextos pipeline attachments sampling reflect update_main) do (
   %PY% tests\test_%%t.py
   echo.
 )

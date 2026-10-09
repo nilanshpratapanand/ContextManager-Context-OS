@@ -592,9 +592,19 @@ class Engine:
                            "omitted_units": len(selection.omitted)},
                 "ms": int((time.time() - t0) * 1000)}
         msg = self.chats.add(cid, "assistant", visible_text(raw), meta)
+        self._reflect(ctx)
         yield {"type": "done", "message": msg}
 
     # ------------------------------------------------------------- pipeline
+    @staticmethod
+    def _reflect(ctx: ContextOS) -> None:
+        """Tidy the store after a turn; never allowed to break the reply."""
+        try:
+            from . import reflect
+            reflect.run(ctx.store)
+        except Exception:
+            pass
+
     def _describer(self):
         if self._test_describe:
             return self._test_describe
@@ -641,7 +651,15 @@ class Engine:
         written = []
         addr = f"/task/pipeline/turn-{user_msg_rec['seq']}"
         existed = ctx.get(addr) is not None
-        u = ctx.put(addr, final[:1500], kind="fact", source="pipeline", importance=0.7)
+        step_addrs = []
+        for st in meta_steps:                      # each part is kept, and linked to the result
+            if st.get("ok") and st.get("output"):
+                sa = f"{addr}/{st['id']}"
+                ctx.put(sa, f"{st['task'][:200]}\n=> {st['output']}", kind="tool_result",
+                        source="pipeline", importance=0.3)
+                step_addrs.append(sa)
+        u = ctx.put(addr, final[:1500], kind="fact", source="pipeline", importance=0.7,
+                    meta={"derived_from": step_addrs})
         written.append({"address": u.address, "kind": u.kind, "value": u.value,
                         "created": not existed})
         meta = {"provider": who, "model": self._model(who) if who in PROVIDERS else who,
@@ -652,6 +670,7 @@ class Engine:
                            "sent": count_tokens(context_text), "omitted_units": 0},
                 "ms": int((time.time() - t0) * 1000)}
         msg = self.chats.add(cid, "assistant", final, meta)
+        self._reflect(ctx)
         yield {"type": "delta", "text": final}
         yield {"type": "done", "message": msg}
 
