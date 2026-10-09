@@ -250,12 +250,12 @@ select.model{font:inherit;font-size:12.5px;padding:5px 8px;border-radius:8px;
   display:flex;align-items:flex-end;gap:8px}
 .composer{transition:border-color var(--dur-base) var(--ease),box-shadow var(--dur-base) var(--ease)}
 .composer:focus-within{border-color:var(--accent);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 16%,transparent)}
-#input{flex:1;border:0;outline:0;resize:none;background:transparent;color:var(--text);
+#input,#bChange{flex:1;border:0;outline:0;resize:none;background:transparent;color:var(--text);
   font:inherit;padding:7px 0;max-height:220px;min-height:24px;line-height:1.5}
-#sendBtn{width:36px;height:36px;border-radius:50%;background:var(--accent);color:var(--accent-ink);
+#sendBtn,#bChangeBtn{width:36px;height:36px;border-radius:50%;background:var(--accent);color:var(--accent-ink);
   display:grid;place-items:center;flex:none}
-#sendBtn:disabled{opacity:.35;cursor:default}
-#sendBtn:not(:disabled):hover{transform:scale(1.07)}
+#sendBtn:disabled,#bChangeBtn:disabled{opacity:.35;cursor:default}
+#sendBtn:not(:disabled):hover,#bChangeBtn:not(:disabled):hover{transform:scale(1.07)}
 #sendBtn:not(:disabled):active{transform:scale(.93)}
 #sendBtn .icon{animation:pop var(--dur-base) var(--ease-emph)}
 @keyframes pop{from{transform:scale(.55) rotate(-40deg);opacity:0}to{transform:none;opacity:1}}

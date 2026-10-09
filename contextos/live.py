@@ -241,6 +241,24 @@ def strip_reasoning(text: str) -> str:
     return out.strip()
 
 
+def openai_text(data: Any) -> str:
+    """Reply text of an OpenAI-style response. Free gateways sometimes answer HTTP 200
+    with an error object or no choices at all (rate limit, upstream failure); that must
+    surface as a ProviderError so the caller moves to the next model instead of crashing."""
+    if not isinstance(data, dict):
+        raise ProviderError("unexpected response from the provider")
+    err = data.get("error")
+    if err:
+        msg = err.get("message") if isinstance(err, dict) else str(err)
+        code = err.get("code") if isinstance(err, dict) else ""
+        raise ProviderError(f"{code or 'error'}: {str(msg)[:200]}")
+    choices = data.get("choices")
+    if not choices:
+        raise ProviderError("empty reply (the provider returned no choices)")
+    msg = (choices[0] or {}).get("message") or {}
+    return msg.get("content") or ""
+
+
 def complete(provider: Provider, system: str, user: str, env: dict[str, str], *,
              max_tokens: int = 700, temperature: float = 0.0,
              timeout: int = 60) -> tuple[str, int]:
@@ -257,7 +275,7 @@ def complete(provider: Provider, system: str, user: str, env: dict[str, str], *,
                          {"role": "user", "content": user}],
             "max_tokens": max_tokens, "temperature": temperature, **provider.extra,
         }, {"Authorization": f"Bearer {key}"}, timeout)
-        text = data["choices"][0]["message"]["content"] or ""
+        text = openai_text(data)
         used = (data.get("usage") or {}).get("prompt_tokens", 0)
 
     elif provider.style == "anthropic":
@@ -278,8 +296,8 @@ def complete(provider: Provider, system: str, user: str, env: dict[str, str], *,
                                  "maxOutputTokens": max_tokens},
         }, {}, timeout)
         cands = data.get("candidates") or []
-        text = "".join(p.get("text", "")
-                       for p in (cands[0]["content"]["parts"] if cands else []))
+        text = "".join(p.get("text", "") for p in
+                       ((cands[0].get("content") or {}).get("parts") or [] if cands else []))
         used = (data.get("usageMetadata") or {}).get("promptTokenCount", 0)
 
     return strip_reasoning(text), int(used or count_tokens(system + user))

@@ -216,5 +216,5 @@ def gemini_describer(env: dict[str, str], post: Callable[..., dict]) -> Optional
             "generationConfig": {"temperature": 0.0, "maxOutputTokens": 1500}}, {}, 60)
         cands = data.get("candidates") or []
         return "".join(p.get("text", "") for p in
-                       (cands[0]["content"]["parts"] if cands else []))
+                       ((cands[0].get("content") or {}).get("parts") or [] if cands else []))
     return describe
