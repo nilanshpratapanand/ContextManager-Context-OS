@@ -1,0 +1,5 @@
+# Batch files stay CRLF byte-for-byte: with LF line endings cmd.exe can fail to
+# find goto/call labels, and raw GitHub downloads serve the file exactly as stored.
+*.bat  -text
+# Shell scripts stay LF, or bash on macOS/Linux fails on the carriage returns.
+*.sh   text eol=lf

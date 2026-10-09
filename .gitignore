@@ -1,0 +1,12 @@
+.env
+.env.*
+!.env.example
+*.db
+*.db-shm
+*.db-wal
+__pycache__/
+*.pyc
+chat_data/
+mcp.json
+build/
+*.egg-info/

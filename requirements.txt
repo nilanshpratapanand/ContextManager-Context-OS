@@ -1,0 +1,5 @@
+# ContextOS runs on the Python standard library alone (Python 3.9+).
+# Nothing below is required - the installers treat a failure here as a warning.
+#
+# Exact token counts. Without it, tokens are estimated as characters / 4.
+tiktoken>=0.5

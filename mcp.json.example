@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "memory": {
+      "command": "python",
+      "args": ["-m", "contextos.mcp_server", "--db", "shared_notes.db"],
+      "trusted": true
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "C:/work/shared"],
+      "disabled": true
+    }
+  }
+}

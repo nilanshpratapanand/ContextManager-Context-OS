@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "contextos"
+version = "0.3.0"
+description = "The state layer that makes trajectory-drop model handoffs work"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+dependencies = []
+
+[project.optional-dependencies]
+exact-tokens = ["tiktoken>=0.5"]
+
+[project.scripts]
+contextos = "contextos.cli:main"
+contextos-mcp = "contextos.mcp_server:main"
+
+[tool.setuptools]
+packages = ["contextos"]
+
+# Non-Python files the package needs at runtime; without this `pip install .`
+# ships the server without its UI and the agent without its bundled skills.
+[tool.setuptools.package-data]
+contextos = ["dashboard.html", "static/*", "static/fonts/*", "skills/*/SKILL.md", "skills/*/*"]

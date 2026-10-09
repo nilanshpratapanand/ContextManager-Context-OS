@@ -1,0 +1,6 @@
+Bundled fonts (latin subset, variable), all licensed under the SIL Open Font License 1.1
+(https://openfontlicense.org), obtained from the Fontsource npm packages:
+
+- Bricolage Grotesque, Copyright 2022 The Bricolage Grotesque Project Authors
+- Geist, Copyright 2024 The Geist Project Authors (https://github.com/vercel/geist-font)
+- Geist Mono, Copyright 2024 The Geist Project Authors (https://github.com/vercel/geist-font)
