@@ -1201,9 +1201,23 @@ def serve(data: str, port: int, offline: bool, budget: int, env_path: str,
     data_dir = str(pathlib.Path(data) / "offline") if offline else data
     engine = Engine(data_dir, env, offline, budget)
     engine.env_path, engine.auto_offline = env_path, auto_offline
+    httpd = None
+    for candidate in range(port, port + 10):
+        try:
+            httpd = ThreadingHTTPServer(("127.0.0.1", candidate), Handler)
+            break
+        except OSError:
+            continue
+    if httpd is None:
+        engine.close()
+        print(f"\nPort {port} (and the next 9) are all in use. Another ContextOS window is probably "
+              "still running. Close it, or start with: python -m contextos.server --port 9000")
+        return 1
+    if candidate != port:
+        print(f"\n  Port {port} is busy (an older ContextOS window may still be open), "
+              f"using {candidate} instead.")
+    port = candidate
     Handler.engine, Handler.port = engine, port
-
-    httpd = ThreadingHTTPServer(("127.0.0.1", port), Handler)
     httpd.daemon_threads = True
     url = f"http://127.0.0.1:{port}"
     print("=" * 62)

@@ -136,7 +136,7 @@ goto done
 :dashoff
 cls
 echo Starting the chat with simulated replies - no API keys used.
-echo Your browser will open at http://127.0.0.1:8000
+echo Your browser will open automatically (the address is printed below).
 echo.
 echo Try this once it loads:
 echo   1. Type a task, for example "build OAuth2 login, no new dependencies"
@@ -156,7 +156,7 @@ if not exist ".env" (
   goto done
 )
 echo Starting the chat with your real providers from .env.
-echo Your browser will open at http://127.0.0.1:8000
+echo Your browser will open automatically (the address is printed below).
 echo.
 echo This makes real API calls. Press Ctrl+C in this window to stop.
 echo.
