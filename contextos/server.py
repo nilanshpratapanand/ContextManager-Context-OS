@@ -427,7 +427,18 @@ class Engine:
                 cid, "user", prompt,
                 {"attachments": [a.public() for a in atts]} if atts else None)
             for a in atts:        # durable, addressable, carried across model handoffs
-                ctx.put_artifact(a.address, a.name, a.text, source="user", importance=0.85)
+                ch = a.chunks
+                if not ch:
+                    ctx.put_artifact(a.address, a.name, a.text, source="user", importance=0.85)
+                    continue
+                # Big file: an index unit plus one unit per part, so later turns
+                # retrieve only the parts that match the question.
+                ctx.put_artifact(a.address, a.name,
+                                 f"{a.name}: {len(ch)} parts. Opening:\n{ch[0][:600]}",
+                                 source="user", importance=0.85)
+                for i, c in enumerate(ch):
+                    ctx.put_artifact(f"{a.address}/part-{i + 1:02d}", a.name, c,
+                                     source="user", importance=0.6)
 
         pipe = lane == "pipeline" or prompt.lstrip().lower().startswith("/pipeline")
         if pipe:
@@ -443,7 +454,7 @@ class Engine:
                "user_message": user_msg_rec}
 
         if pipe:
-            yield from self._pipeline_turn(cid, ctx, text_in, user_msg_rec, attach.render(atts))
+            yield from self._pipeline_turn(cid, ctx, text_in, user_msg_rec, attach.render(atts, text_in))
             return
 
         wanted = forced or (lane if lane in (router.SMART, router.FAST) else self.mode)
@@ -460,7 +471,7 @@ class Engine:
         recent = "\n".join(f"{m['role']}: {m['content'][:400]}" for m in history[-2:])
         selection = ctx.select(text_in, budget_tokens=self.budget)
         context_text = render(selection.units) or "(nothing on file yet)"
-        attach_text = attach.render(atts)
+        attach_text = attach.render(atts, text_in)
         user_msg = (f"## Context on file\n{context_text}\n\n"
                     + (f"{attach_text}\n\n" if attach_text else "")
                     + (f"## Last exchange\n{recent}\n\n" if recent else "")

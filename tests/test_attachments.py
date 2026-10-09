@@ -32,6 +32,32 @@ class ProcessTests(unittest.TestCase):
         a = A.process([f("l.txt", b"a" * (A.MAX_TEXT_CHARS + 50))])[0]
         self.assertTrue(a.truncated); self.assertEqual(len(a.text), A.MAX_TEXT_CHARS)
 
+    def test_chunking_and_relevant_pick(self):
+        text = "".join(f"line {i} filler words here\n" for i in range(600)) + "the secret launch code is 4417\n" + "tail\n" * 300
+        a = A.process([f("big.txt", text.encode())])[0]
+        ch = a.chunks; self.assertGreater(len(ch), 3)
+        self.assertEqual("".join(ch), text.strip())
+        idx = A.pick(ch, "what is the launch code?")
+        self.assertIn(0, idx)
+        self.assertTrue(any("4417" in ch[i] for i in idx))
+        self.assertLess(sum(len(ch[i]) for i in idx), A.PROMPT_BUDGET + len(ch[0]) + 1)
+        out = A.render([a], "what is the launch code?")
+        self.assertIn("not shown: parts", out); self.assertIn("4417", out)
+        self.assertLess(len(out), len(text) / 2)
+
+    def test_no_overlap_reads_in_order(self):
+        text = "".join(f"alpha beta {i}\n" for i in range(2000))
+        ch = A.process([f("o.txt", text.encode())])[0].chunks
+        idx = A.pick(ch, "summarise this")
+        self.assertEqual(idx, list(range(len(idx))))
+
+    def test_small_file_goes_in_whole(self):
+        a = A.process([f("s.txt", b"tiny")])[0]
+        self.assertEqual(a.chunks, []); self.assertIn("tiny", A.render([a], "q"))
+
+    def test_ranges_helper(self):
+        self.assertEqual(A._ranges([1, 2, 3, 7, 9, 10]), "1-3, 7, 9-10")
+
     def test_image_needs_describer_then_uses_it(self):
         img = f("p.png", b"\x89PNG....", "image/png")
         with self.assertRaises(A.AttachmentError):
@@ -67,6 +93,17 @@ class EngineTests(unittest.TestCase):
         self.assertIn("sha256", u.meta)
         user_msg = [m for m in e.chats.messages(cid) if m["role"] == "user"][0]
         self.assertEqual(user_msg["meta"]["attachments"][0]["name"], "spec.txt")
+
+    def test_big_file_stored_as_parts_and_retrieved_by_question(self):
+        from contextos.server import Engine
+        e = Engine(tempfile.mkdtemp(), {}, offline=True)
+        text = "".join(f"row {i} filler words\n" for i in range(900)) + "the vault pin is 9021\n" + "pad\n" * 400
+        evs = list(e.chat_stream(None, "what is the vault pin?", attachments=[f("log.txt", text.encode())]))
+        cid = evs[-1]["message"]["conv_id"]; ctx = e.ctx_for(cid)
+        parts = ctx.store.list("/artifact/uploads/log-txt/")
+        self.assertGreater(len(parts), 3)
+        sel = ctx.select("vault pin", budget_tokens=800)
+        self.assertTrue(any("9021" in u.value for u in sel.units))
 
     def test_bad_attachment_errors_without_saving_message(self):
         from contextos.server import Engine
