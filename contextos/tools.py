@@ -78,7 +78,13 @@ class Workspace:
                             r"id_ed25519|\.contextos_memory\.db)", re.I)
 
     def path(self, rel: str) -> Path:
-        p = (self.root / (rel or ".")).resolve()
+        # Refuse Windows-style escapes on every OS: a workspace made on Linux can be
+        # zipped and opened on Windows, where "..\\x" and "C:/x" do leave the folder.
+        raw = rel or "."
+        if re.match(r"^[A-Za-z]:", raw) or ".." in raw.replace("\\", "/").split("/"):
+            raise ToolError(f"'{rel}' is outside the workspace; only files under "
+                            f"{self.root.name}/ can be used")
+        p = (self.root / raw).resolve()
         if p != self.root and self.root not in p.parents:
             raise ToolError(f"'{rel}' is outside the workspace; only files under "
                             f"{self.root.name}/ can be used")

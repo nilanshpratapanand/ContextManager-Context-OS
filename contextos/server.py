@@ -139,6 +139,7 @@ class Engine:
         self.env = env
         self.offline = offline
         self._test_pool = None
+        self._save_lock = threading.Lock()
         self._test_describe = None
         self.budget = budget
         self.events: list[dict[str, Any]] = []
@@ -818,10 +819,14 @@ class Engine:
                             for m in re.finditer(r"^- (PASS|FAIL) \*\*(.+?)\*\*", text, re.M)]})
 
     def _save_builds(self) -> None:
-        recs = [b.record() for b in self.builds.values()][-200:]
-        tmp = self._index().with_suffix(".tmp")
-        tmp.write_text(json.dumps(recs, indent=1), encoding="utf-8")
-        tmp.replace(self._index())
+        # Several threads can save at once (a build finishing while another starts).
+        # A shared temp name made one replace() find the file already moved by the
+        # other, so serialise saves and give each its own temp file.
+        with self._save_lock:
+            recs = [b.record() for b in self.builds.values()][-200:]
+            tmp = self._index().with_name(f"builds.{threading.get_ident()}.tmp")
+            tmp.write_text(json.dumps(recs, indent=1), encoding="utf-8")
+            tmp.replace(self._index())
 
     def change_build(self, bid: str, request: str) -> dict[str, Any]:
         """A follow-up change to a finished build, in the same project and memory."""
