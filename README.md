@@ -45,6 +45,10 @@ ContextOS keeps the **memory of a conversation in your own app, not inside a mod
 | **7 free providers** | Groq, Google Gemini, OpenRouter, NVIDIA, Cloudflare, Mistral and Cohere, plus Ollama for offline use. None of them need a credit card. |
 | **Zero dependencies** | Pure Python standard library and SQLite, with no build step. The installer sets everything up. |
 
+## Try it in your browser
+
+No install: a **web edition** runs the same app entirely in the browser. Your chats and API keys stay on your device, and Build mode, connectors and file attachments (which need a computer of their own) are left to the desktop app below. You can also [deploy your own copy to Netlify](docs/WEB.md) for free.
+
 ## Install
 
 ### Windows 10 / 11

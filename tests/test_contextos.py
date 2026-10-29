@@ -1685,5 +1685,34 @@ def test_update_is_silent_when_offline():
         update._get = real
 
 
+# ---------------------------------------------------------------- web edition
+def test_web_edition_is_built_and_its_policy_covers_every_provider():
+    """web/ is generated and committed; it must match its sources, and the Content
+    Security Policy (the safety net for bring-your-own-key) must allow exactly the
+    provider hosts the engine can call."""
+    import pathlib
+    import re
+    import subprocess
+    from urllib.parse import urlparse
+    from contextos.live import PROVIDERS
+    root = pathlib.Path(__file__).resolve().parent.parent
+    r = subprocess.run([sys.executable, str(root / "tools" / "build_web.py"), "--check"],
+                       capture_output=True, text=True)
+    assert r.returncode == 0, r.stdout + r.stderr
+    toml = (root / "netlify.toml").read_text("utf-8")
+    csp = re.search(r'Content-Security-Policy = "([^"]+)"', toml).group(1)
+    connect = re.search(r"connect-src ([^;]+)", csp).group(1).split()
+    for p in PROVIDERS.values():
+        u = urlparse(p.url)
+        origin = f"{u.scheme}://{u.netloc}".replace("{account_id}", "")
+        if u.hostname in ("localhost", "127.0.0.1"):
+            assert origin in connect, origin
+        else:
+            assert origin in connect or "https://" + u.hostname in connect, origin
+    assert "'self'" in connect
+    for forbidden in ("*", "https:", "http:"):
+        assert forbidden not in connect, f"connect-src must not allow {forbidden}"
+
+
 if __name__ == "__main__":
     raise SystemExit(_run())
