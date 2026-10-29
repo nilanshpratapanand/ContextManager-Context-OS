@@ -1,0 +1,246 @@
+{
+ "units": [
+  [
+   "/task/goal",
+   "Build a hostel booking app on PostgreSQL with OAuth login",
+   "goal",
+   "user",
+   1.0,
+   true
+  ],
+  [
+   "/project/constraints/no-deps",
+   "No new runtime dependencies without architecture review",
+   "constraint",
+   "user",
+   0.95,
+   false
+  ],
+  [
+   "/project/constraints/budget",
+   "Keep monthly hosting under 20 dollars",
+   "constraint",
+   "user",
+   0.95,
+   false
+  ],
+  [
+   "/project/decisions/db",
+   "PostgreSQL 16 chosen for JSONB and row level security",
+   "decision",
+   "model-a",
+   0.9,
+   false
+  ],
+  [
+   "/project/decisions/oauth-lib",
+   "Use authlib, not oauthlib, authlib is already vendored",
+   "decision",
+   "model-a",
+   0.9,
+   false
+  ],
+  [
+   "/task/blockers/redis-acl",
+   "Redis in staging has no ACL so the revocation list cannot be written",
+   "blocker",
+   "model-a",
+   0.85,
+   false
+  ],
+  [
+   "/task/inputs/room-count",
+   "The hostel has 24 rooms and 96 beds",
+   "fact",
+   "user",
+   0.7,
+   false
+  ],
+  [
+   "/task/inputs/checkout-time",
+   "Checkout is at 10:00 AM",
+   "fact",
+   "user",
+   0.7,
+   false
+  ],
+  [
+   "/task/results/schema",
+   "bookings table has room_id, guest_id, check_in, check_out",
+   "fact",
+   "model-a",
+   0.7,
+   false
+  ],
+  [
+   "/user/preferences/style",
+   "Prefers short answers with code first",
+   "preference",
+   "user",
+   0.5,
+   false
+  ],
+  [
+   "/tool/search/hit1",
+   "Search result about OAuth token grant scope nonce claim refresh revoke introspect bearer",
+   "tool_result",
+   "tool",
+   0.1,
+   false
+  ],
+  [
+   "/tool/search/hit2",
+   "Search result about database cursor socket index worker cache retry timeout handler schema",
+   "tool_result",
+   "tool",
+   0.1,
+   false
+  ],
+  [
+   "/artifact/api/routes",
+   "def create_booking(): pass  # routes file body",
+   "artifact",
+   "model-a",
+   0.8,
+   false
+  ]
+ ],
+ "queries": [
+  "what is blocking us right now",
+  "which database did we pick and why",
+  "how many rooms are there",
+  "checkout time",
+  "what are the constraints",
+  "oauth",
+  "write the bookings schema",
+  "/project/decisions/db"
+ ],
+ "budgets": [
+  300,
+  1500
+ ],
+ "prompts": [
+  "hi",
+  "thanks a lot",
+  "Design a database schema for a hostel booking app on PostgreSQL",
+  "a shirt costs 800, 10% off, then 18% tax - final price?",
+  "Write a Python function to reverse a linked list",
+  "translate this to French",
+  "Explain why my code throws a traceback and debug it step by step",
+  "1. do this\n2. do that\n3. compare both?",
+  "```js\nconst x = 1;\n```",
+  "what is the capital of France?"
+ ],
+ "addresses": [
+  "project/architecture/db",
+  "/Project/Architecture/DB/",
+  "/user/x",
+  "/bogus/x",
+  "/task/a b",
+  "/task/ok.name-1_x"
+ ],
+ "texts": [
+  "<context>\nfact | /a | b\n</context>\nHello **world**",
+  "<think>secret</think>Answer",
+  "Answer <con",
+  "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! hello",
+  "plain text reply"
+ ],
+ "creative": [
+  "write a poem about the sea",
+  "brainstorm names for a cafe",
+  "give me a slogan",
+  "Rephrase this sentence politely"
+ ],
+ "reflect": [
+  [
+   "/project/notes/a",
+   "Use PostgreSQL 16 for storage",
+   "fact",
+   0.4,
+   null
+  ],
+  [
+   "/project/notes/b",
+   "use  postgresql 16 for STORAGE",
+   "fact",
+   0.8,
+   null
+  ],
+  [
+   "/task/x1",
+   "identical protected text here",
+   "constraint",
+   0.5,
+   null
+  ],
+  [
+   "/task/x2",
+   "identical protected text here",
+   "constraint",
+   0.5,
+   null
+  ],
+  [
+   "/tool/search/h0",
+   "result number 0 with distinct words 0",
+   "tool_result",
+   0.1,
+   null
+  ],
+  [
+   "/tool/search/h1",
+   "result number 1 with distinct words 7",
+   "tool_result",
+   0.1,
+   null
+  ],
+  [
+   "/tool/search/h2",
+   "result number 2 with distinct words 14",
+   "tool_result",
+   0.1,
+   null
+  ],
+  [
+   "/tool/search/h3",
+   "result number 3 with distinct words 21",
+   "tool_result",
+   0.1,
+   null
+  ],
+  [
+   "/tool/search/h4",
+   "result number 4 with distinct words 28",
+   "tool_result",
+   0.1,
+   null
+  ],
+  [
+   "/tool/search/keep",
+   "important tool output worth keeping long",
+   "tool_result",
+   0.9,
+   null
+  ],
+  [
+   "/task/r",
+   "result text for the pipeline step",
+   "fact",
+   0.7,
+   {
+    "derived_from": [
+     "/task/r/s1",
+     "/task/r/gone"
+    ]
+   }
+  ],
+  [
+   "/task/r/s1",
+   "step one output text distinct",
+   "tool_result",
+   0.9,
+   null
+  ]
+ ]
+}

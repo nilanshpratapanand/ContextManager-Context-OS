@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta name="description" content="A chat app that keeps its memory when the model changes. Free AI models, your own keys.">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ContextOS</title>
 <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
@@ -459,6 +460,10 @@ body.still *,body.still *::before,body.still *::after{animation:none!important;t
 body.still ::view-transition-group(*),body.still ::view-transition-old(*),body.still ::view-transition-new(*){animation:none!important}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}}
+/* web edition (static host): no Build, connectors, attachments or Pipeline; see webapp/engine.js */
+body.web #newBuildBtn,body.web #connBtn,body.web #attachBtn,body.web [data-lane="pipeline"]{display:none}
+.relay{margin:12px 0 0;padding:10px 12px;border:1px solid var(--line);border-radius:var(--r-card);font-size:13px;color:var(--dim)}
+.relay label{display:flex;gap:8px;align-items:flex-start;color:var(--text);cursor:pointer}
 /* --------------------------------------------------------------- mobile */
 #scrim{display:none}
 @media (max-width:1100px){
@@ -819,7 +824,7 @@ function dayGroup(ts){
 function friendlyError(e){
   const s = String(e || '');
   if(/Every provider failed/.test(s)) return 'Every model is busy or unavailable right now. Try again in a minute.';
-  if(/No providers/.test(s)) return 'No model providers are set up. Add an API key to .env and restart.';
+  if(/No providers/.test(s)) return S.state && S.state.web ? 'No model providers are set up. Add a free API key under Set up models.' : 'No model providers are set up. Add an API key to .env and restart.';
   if(/Failed to fetch|NetworkError|HTTP 5/.test(s)) return 'Lost the connection to the ContextOS server. Is it still running?';
   return s;
 }
@@ -957,8 +962,8 @@ const SUGGEST = [
 function renderThread(){
   const t = $('#thread');
   if(!S.messages.length){
-    const setup = S.state && S.state.needs_setup ? `<div class="setup-banner"><b>No models set up yet.</b>
-      Replies are simulated until you add a free API key. It takes about a minute, no credit card.
+    const setup = S.state && S.state.needs_setup ? `<div class="setup-banner"><b>${S.state.web ? 'You are in demo mode.' : 'No models set up yet.'}</b>
+      Replies are simulated until you add a free API key. It takes about a minute, no credit card${S.state.web ? '. Your key stays in this browser.' : '.'}
       <div><button class="btn primary" data-open-keys>Set up free models</button></div></div>` : '';
     t.innerHTML = `<div class="welcome">${setup}${MARK('big intro')}<h1>What are we working on?</h1>
       <p>Each chat keeps its own memory. Hard questions go to the strongest free models, easy ones to
@@ -966,7 +971,9 @@ function renderThread(){
       <div class="seam sample" role="img" aria-label="Example: a handoff from one model to another with the memory carried"><span>Groq \u27F6 Gemini \u00B7 412 tokens carried</span></div>
       <div class="chips">${SUGGEST.map(([a, b]) =>
         `<button class="chip" data-suggest="${esc(a + ': ' + b)}"><b>${esc(a)}</b><span>${esc(b)}</span></button>`).join('')}
-      </div></div>`;
+      </div>${S.state && S.state.web ? `<p class="dim" style="margin:22px auto 0;font-size:13px">Your chats and keys stay in this browser.
+        Want Build mode and file attachments? <a href="https://github.com/nilanshpratapanand/Context-Manager-Context-OS/releases/latest"
+        target="_blank" rel="noopener noreferrer">Get the desktop app</a>.</p>` : ''}</div>`;
     return;
   }
   const lastBot = [...S.messages].reverse().find(m => m.role === 'assistant');
@@ -1313,7 +1320,8 @@ async function previewHandoff(){
 async function refreshState(){
   try { S.state = await api('/api/state'); } catch { return; }
   const s = S.state;
-  $('#modeBadge').textContent = s.offline ? 'offline' : 'live';
+  document.body.classList.toggle('web', !!s.web);
+  $('#modeBadge').textContent = s.web ? (s.offline ? 'demo' : 'web') : (s.offline ? 'offline' : 'live');
   const ok = s.providers.filter(p => !p.failed && !p.cooldown).length;
   $('#provLabel').textContent = `${ok}/${s.providers.length} ready`;
   $('#provDot').className = 'dot ' + (ok === 0 ? 'bad' : ok < s.providers.length ? 'warn' : 'ok');
@@ -1405,9 +1413,19 @@ async function loadPortable(size){
     (r.left_out ? ` ${r.left_out} less important item${r.left_out > 1 ? 's' : ''} left out.` : '');
   $('#portPreview').textContent = r.text;
 }
-function download(href){
-  const a = document.createElement('a'); a.href = href; a.download = '';
-  document.body.appendChild(a); a.click(); a.remove();
+async function download(href){
+  // Through fetch (not a bare link) so it also works where /api is answered in the page.
+  const save = (url, name) => { const a = document.createElement('a'); a.href = url; a.download = name || '';
+    document.body.appendChild(a); a.click(); a.remove(); };
+  try {
+    const r = await fetch(href);
+    if(!r.ok) throw new Error(`HTTP ${r.status}`);
+    const cd = r.headers.get('Content-Disposition') || '';
+    const m = /filename\*?=(?:UTF-8'')?"?([^";]+)/i.exec(cd);
+    const url = URL.createObjectURL(await r.blob());
+    save(url, m ? decodeURIComponent(m[1]) : '');
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
+  } catch { save(href); }
 }
 
 // ------------------------------------------------------------------ theme
@@ -1869,11 +1887,18 @@ $('#keysBtn').onclick = showKeys;
 async function showKeys(){
   const k = await api('/api/keys');
   openDialog('Set up models', `<p class="dim">Every provider here is <b>free with no credit card</b>. Add at least one;
-      two or three let ContextOS switch when one is busy. Keys are saved to <code>.env</code> on this computer and
-      never shown again.</p>
+      two or three let ContextOS switch when one is busy. ${k.web
+        ? 'Keys are stored only in this browser and sent only to the provider they belong to. They are never shown again.'
+        : 'Keys are saved to <code>.env</code> on this computer and never shown again.'}</p>
     ${k.providers.map(keyCard).join('')}
-    <p class="dim" style="margin-top:6px">Saved to <code>${esc(k.env_file)}</code></p>`);
+    ${k.web ? `<div class="relay"><label><input type="checkbox" id="relayOn"${k.relay ? ' checked' : ''}>
+      <span><b>Use the relay for providers that block browsers.</b> Some providers refuse calls made straight from a web page.
+      With this on, those calls pass through this site's relay (your key is forwarded for that one request and not stored or logged).
+      Off by default.</span></label></div>` : ''}
+    <p class="dim" style="margin-top:6px">Saved to ${k.web ? esc(k.env_file) : `<code>${esc(k.env_file)}</code>`}</p>`);
   $('#dlgBody').querySelectorAll('.kcard').forEach(wireKeyCard);
+  const rl = $('#relayOn');
+  if(rl) rl.onchange = async () => { await api('/api/relay', {on:rl.checked}); toast(rl.checked ? 'Relay on' : 'Relay off'); };
 }
 function keyCard(p){
   const extra = p.extra ? `<div class="kin"><input type="text" data-env="${esc(p.extra.env)}" autocomplete="off"
@@ -1930,7 +1955,7 @@ function wireKeyCard(card){
   card.querySelector('[data-save]').onclick = () => save(values(), false);
   const rm = card.querySelector('[data-remove]');
   if(rm) rm.onclick = () => {
-    if(!confirm('Remove this key from .env?')) return;
+    if(!confirm(S.state && S.state.web ? 'Remove this key from this browser?' : 'Remove this key from .env?')) return;
     const clear = {}; card.querySelectorAll('input[data-env]').forEach(i => clear[i.dataset.env] = '');
     save(clear, true);
   };

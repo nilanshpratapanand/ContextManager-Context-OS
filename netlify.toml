@@ -1,0 +1,25 @@
+# ContextOS web edition on Netlify. No build step: web/ is generated and committed
+# (python tools/build_web.py rebuilds it; the tests fail if it is stale).
+[build]
+  publish = "web"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    # connect-src is the safety net for "bring your own key": the page can talk only to this
+    # site, the AI providers below and a local Ollama, so a key cannot be sent anywhere else.
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src 'self' https://cdnjs.cloudflare.com; img-src 'self' data: blob:; connect-src 'self' https://api.groq.com https://generativelanguage.googleapis.com https://openrouter.ai https://integrate.api.nvidia.com https://api.cloudflare.com https://api.mistral.ai https://api.cohere.ai https://api.anthropic.com http://localhost:11434 http://127.0.0.1:11434; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "no-referrer"
+    X-Frame-Options = "DENY"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=(), payment=()"
+
+[[headers]]
+  for = "/static/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/engine.js"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
